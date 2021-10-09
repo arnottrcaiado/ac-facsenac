@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" http-equiv="refresh" content="60;url=https://fac.pythonanywhere.com/mostra"/>
+
+<title> AC - Automação Comercial - DashBoard </title>
+</head>
+<body style="background-color:powderblue;">
+<h1>AC - DashBoard</h1>
+<p>--- Dash Board de Leituras ---</p>
+<form  method="get">
+    <input type="text" id ="data" name="data" value='{{s1}}' readonly> -> Sensor<br>
+    <input type="text" id ="data" name="data" value='{{d1}}' readonly> -> Data da Ultima Leitura<br>
+    <input type="text" id ="hora" name="hora" value='{{h1}}' readonly> -> Hora da Ultima Leitura<br>
+    <input type="text" id ="temperatura" name="temperatura" value='{{t1}}' readonly> -> Ultima Temperatura<br>
+    <input type="test" id ="umidade" name="umidade" value='{{u1}}' readonly> -> Ultima Umidade<br>
+    <br>
+    <input type="text" id ="data" name="data" value='{{s2}}' readonly> -> Sensor<br>
+    <input type="text" id ="data" name="data" value='{{d2}}' readonly> -> Data da Ultima Leitura<br>
+    <input type="text" id ="hora" name="hora" value='{{h2}}' readonly> -> Hora da Ultima Leitura<br>
+    <input type="text" id ="temperatura" name="temperatura" value='{{t2}}' readonly> -> Ultima Temperatura<br>
+    <input type="test" id ="umidade" name="umidade" value='{{u2}}' readonly> -> Ultima Umidade<br>
+
+    <div class="button">
+        <button style="margin-top: 5px;" type="submit">Ver</button>
+    </div>
+</form>
+</html>
