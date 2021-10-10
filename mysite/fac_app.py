@@ -14,6 +14,10 @@ import json
 import tweepy   # biblioteca para envio de mensagens pelo twitter
 import ffac_headers as chaves
 import pandas as pd
+from flask_mail import Mail, Message
+from random import choice
+import string
+
 
 twitter_auth_keys = {
         "consumer_key"        : chaves.c_key,
@@ -43,6 +47,16 @@ arquivos = {'A11': '/home/fac/mysite/dados/leituras_a11.csv', 'A22': '/home/fac/
 
 
 app = Flask(__name__)
+
+# configuracao para envio de email
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = chaves.mail_username
+app.config['MAIL_PASSWORD'] = chaves.mail_password # senha de app https://support.google.com/accounts/answer/185833?hl=pt-BR
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
+
 
 @app.route('/mostra', methods=['GET'])
 def inicio():
@@ -107,3 +121,50 @@ def twitt():
     api.update_status(tweet)
     return "ok"
 
+
+# Exemplo envio email de nova credencial
+
+@app.route("/email")
+def enviaMensagem():
+
+    destino = request.args.get('destino')
+    mensagem = request.args.get('mensagem')
+    assunto = request.args.get('assunto')
+
+    if destino == None :
+        return json.dumps({'Envia':'Erro - Sem destino'})
+
+    if mensagem == None :
+        return json.dumps({'Envia':'Erro - Sem Mensagem'})
+
+    if assunto == None :
+        return json.dumps({'Envia':'Erro - Sem Assunto'})
+
+    # mensagem completa, enviar email
+    msg = Message( assunto, sender = chaves.mail_username, recipients = [destino])
+    msg.body = mensagem
+    mail.send(msg)
+    return json.dumps({'Mensagem':'Enviada'})
+
+
+@app.route("/credencial")
+def geraCredencial():
+    destino = request.args.get('destino')
+    if destino != None :
+        msg = Message('Atualização de Acesso', sender = chaves.mail_username, recipients = [destino])
+        msg.body = "\n Olá - Mensagem gerada pelo i9iapp.\n Esta é sua nova credencial : \n\n"+" "+gerasenha()
+        # neste ponto, deveriamos inserir uma funcao para guardar a credencial em um banco de dados
+        # associado ao usuario
+        mail.send(msg)
+        return json.dumps({'Credencial':'Enviada'})
+    else :
+        return json.dumps({'Credencial':'Sem destino'})
+
+def gerasenha():
+    tamanho = 20
+    valores = string.ascii_lowercase + string.digits +string.ascii_uppercase
+    senha = ''
+    for i in range(tamanho):
+        senha += choice(valores)
+
+    return senha
