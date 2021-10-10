@@ -12,11 +12,15 @@ import os
 import time
 import json
 import tweepy   # biblioteca para envio de mensagens pelo twitter
-import ffac_headers as chaves
 import pandas as pd
 from flask_mail import Mail, Message
 from random import choice
 import string
+
+import sys
+sys.path.insert(0,'/home/fac')
+import ffac_headers as chaves
+
 
 
 twitter_auth_keys = {
