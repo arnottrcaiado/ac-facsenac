@@ -7,6 +7,7 @@
 # -*- coding: UTF-8 -*-
 
 from flask import Flask, request, render_template
+from flask import redirect
 from datetime import datetime, date
 import os
 import time
@@ -70,7 +71,7 @@ def inicio():
 
     return render_template( 'dash_temp.html', s1= s1, s2=s2, t1=t1, t2=t2, u1=u1, u2=u2, d1=d1, d2=d2, h1=h1, h2=h2)
 
-
+# https://fac.pythonanywhere.com/datalog
 @app.route('/datalog', methods=['GET','POST'])
 def datalog():
 
@@ -172,3 +173,28 @@ def gerasenha():
         senha += choice(valores)
 
     return senha
+
+# end point para redirecionar site
+@app.route("/redir/<string:dir>")
+def redir( dir ) :
+    sites = {
+        'uol' : 'https://uol.com.br',
+        'my' : 'https://i9i.solutions'
+        }
+
+    if dir in sites :
+        return redirect (sites[dir])
+    else :
+        return str(dir)+" Não encontrado"
+
+'''
+# a partir de um codigo, redirecionar site
+def redir_url( codigo ) :
+    df = pd.read_csv( PATH_URL + "i9iapp-url.csv" , sep=";")
+    localiza = df[df['sigla'] == codigo ]
+    site=localiza['site-destino']
+    if len(localiza) == 1 :
+        return redirect ( site[1] )
+    else:
+        return redirect( 'https://i9isolutions.com' )
+'''
