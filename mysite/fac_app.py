@@ -174,7 +174,10 @@ def gerasenha():
 
     return senha
 
+#
 # end point para redirecionar site
+# exemplo    https://fac.pythonanywhere/redir/SITE
+#
 @app.route("/redir/<string:dir>")
 def redir( dir ) :
     sites = {
