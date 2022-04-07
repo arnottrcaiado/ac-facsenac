@@ -8,22 +8,23 @@
 
 from flask import Flask, request, render_template
 from flask import redirect
+from flask_mail import Mail, Message
 from datetime import datetime, date
+from random import choice
+
 import os
 import time
 import json
 import tweepy   # biblioteca para envio de mensagens pelo twitter
 import pandas as pd
-from flask_mail import Mail, Message
-from random import choice
 import string
-
 import sys
-sys.path.insert(0,'/home/fac')
-import ffac_headers as chaves
 
+sys.path.insert(0,'/home/fac')  # define pasta default para arquivos e modulos complementares
 
+import ffac_headers as chaves   # chaves de acesso e autenticação - externas para melhorar segurança
 
+# configurações para uso do twitter
 twitter_auth_keys = {
         "consumer_key"        : chaves.c_key,
         "consumer_secret"     : chaves.c_secret,
@@ -42,6 +43,7 @@ auth.set_access_token(
 
 api = tweepy.API(auth)
 
+# chaves de segurança para API
 api_key_post = chaves.api_key_post
 api_header_key = chaves.api_header_key
 
@@ -62,15 +64,16 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
-
+# endpoint para visualizar ( HTML ) estado atual / ultima leitura de temperatura e umidade
+# http://fac.pythonanywhere.com/mostra
 @app.route('/mostra', methods=['GET'])
 def inicio():
-
     s1, d1, h1, t1, u1 = ultimosDados(arquivos['A11'])
     s2, d2, h2, t2, u2 = ultimosDados(arquivos['A22'])
-
     return render_template( 'dash_temp.html', s1= s1, s2=s2, t1=t1, t2=t2, u1=u1, u2=u2, d1=d1, d2=d2, h1=h1, h2=h2)
+# ------------------------------------------------------------------------------------------------------------------
 
+# enbdpoint para receber dados do ARDUINO ( POST ) e gravar em arquivo
 # https://fac.pythonanywhere.com/datalog
 @app.route('/datalog', methods=['GET','POST'])
 def datalog():
@@ -95,6 +98,7 @@ def datalog():
                 grava_dados( arquivos[p_id], p_id, p_temp, p_umid, p_stat )
 
             return json.dumps({"Data":'ok', 'Id':str(p_id),'Temperatura': str(p_temp), 'Umidade':str(p_umid), 'Stat':str(p_stat)}, ensure_ascii=False )
+# -----------------------------------------------------------------------------------------------------------------------------------------------------
 
 # funcao para gravar dados.
 # Parametros: id, temperatura estatus
@@ -107,6 +111,7 @@ def grava_dados( arq, ident , temp, umid,  stat ) :
     arquivo.write( linha )
     arquivo.close()
 
+# funcao para mostrar ultimos dados lidos
 def ultimosDados( arq ) :
     df=pd.read_csv( arq )
     sensor = df.loc[len(df)-1, 'id']
@@ -115,20 +120,26 @@ def ultimosDados( arq ) :
     data_leitura = df.loc[len(df)-1, 'data']
     hora_leitura = df.loc[len(df)-1, 'hora']
     return sensor, data_leitura, hora_leitura, str(temp), str(umid)
+# --------------------------------------------------------------------
 
+# endpoint para enviar um tuite
+# https://fac.pythonanywhere.com.br/tuite?mensagem=sua mensagem
 @app.route('/tuite')
 def twitt():
+
+    mensagem = request.arqgs.get('mensagem')
     data_atual = str(date.today())
     hora_atual = str(datetime.time(datetime.now()))
     hora_atual = hora_atual[0:5]
 
-    tweet = data_atual +" "+hora_atual+" Estamos prontos para recebe-lo"
+
+    tweet = data_atual +" "+hora_atual+ mensagem
     api.update_status(tweet)
-    return "ok"
+    return " Mensagem enviada para Twitter : "+ tweet
+# ----------------------------------------------------------------------
 
-
-# Exemplo envio email de nova credencial
-
+# endpoint para enviar um email
+# https://fac.pythonanywhere.com.br/email?destino=email@gmail.com?assunto=seu assunto?mensagem=sua mensagem
 @app.route("/email")
 def enviaMensagem():
 
@@ -149,9 +160,11 @@ def enviaMensagem():
     msg = Message( assunto, sender = chaves.mail_username, recipients = [destino])
     msg.body = mensagem
     mail.send(msg)
-    return json.dumps({'Mensagem':'Enviada'})
+    return json.dumps({'Mensagem':'Enviada email:'+mensagem})
+# -------------------------------------------------------------------------------------------------------------
 
-
+# endpoint para gerar nova credencial de acesso
+# https://fac.pythonanywhere.com.br/credencial?destino=seuemail@gmail.com
 @app.route("/credencial")
 def geraCredencial():
     destino = request.args.get('destino')
@@ -173,31 +186,3 @@ def gerasenha():
         senha += choice(valores)
 
     return senha
-
-#
-# end point para redirecionar site
-# exemplo    https://fac.pythonanywhere/redir/SITE
-#
-@app.route("/redir/<string:dir>")
-def redir( dir ) :
-    sites = {
-        'uol' : 'https://uol.com.br',
-        'my' : 'https://i9i.solutions'
-        }
-
-    if dir in sites :
-        return redirect (sites[dir])
-    else :
-        return str(dir)+" Não encontrado"
-
-'''
-# a partir de um codigo, redirecionar site
-def redir_url( codigo ) :
-    df = pd.read_csv( PATH_URL + "i9iapp-url.csv" , sep=";")
-    localiza = df[df['sigla'] == codigo ]
-    site=localiza['site-destino']
-    if len(localiza) == 1 :
-        return redirect ( site[1] )
-    else:
-        return redirect( 'https://i9isolutions.com' )
-'''
