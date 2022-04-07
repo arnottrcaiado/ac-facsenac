@@ -132,7 +132,6 @@ def twitt():
     data_atual = str(date.today())
     hora_atual = str(datetime.time(datetime.now()))
     hora_atual = hora_atual[0:5]
-
     tweet = data_atual +" "+hora_atual+ mensagem
     api.update_status(tweet)
     return " Mensagem enviada para Twitter : "+ tweet
