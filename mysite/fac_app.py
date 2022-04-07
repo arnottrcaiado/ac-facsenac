@@ -80,7 +80,6 @@ def inicio():
 # https://fac.pythonanywhere.com/datalog
 @app.route('/datalog', methods=['GET','POST'])
 def datalog():
-
     if request.headers.get('Authorization-Token') != api_header_key :
         # falha da autenticação do cabeçalho
         return json.dumps({'Datalog':'Erro de authenticação Header'}, ensure_ascii=False )
@@ -129,12 +128,10 @@ def ultimosDados( arq ) :
 # https://fac.pythonanywhere.com.br/tuite?mensagem=sua mensagem
 @app.route('/tuite')
 def twitt():
-
-    mensagem = request.arqgs.get('mensagem')
+    mensagem = request.args.get('mensagem')
     data_atual = str(date.today())
     hora_atual = str(datetime.time(datetime.now()))
     hora_atual = hora_atual[0:5]
-
 
     tweet = data_atual +" "+hora_atual+ mensagem
     api.update_status(tweet)
@@ -145,17 +142,14 @@ def twitt():
 # https://fac.pythonanywhere.com.br/email?destino=email@gmail.com?assunto=seu assunto?mensagem=sua mensagem
 @app.route("/email")
 def enviaMensagem():
-
     destino = request.args.get('destino')
     mensagem = request.args.get('mensagem')
     assunto = request.args.get('assunto')
 
     if destino == None :
         return json.dumps({'Envia':'Erro - Sem destino'})
-
     if mensagem == None :
         return json.dumps({'Envia':'Erro - Sem Mensagem'})
-
     if assunto == None :
         return json.dumps({'Envia':'Erro - Sem Assunto'})
 
