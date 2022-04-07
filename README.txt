@@ -11,5 +11,5 @@ Disciplinas: Automacao Comercial, Fundamentos de Arquitetura de Computadores / I
 
 Prof. Arnott R Caiado
 
-Explorando IOT, Twitter e E-mail em projetos de automacao
+Explorando IOT, Twitter e E-mail em projetos de automacao com NODEMCU, Sensores de Temperatura, Luminosidade e Umidade
 
