@@ -11,7 +11,6 @@
 # -*- coding: UTF-8 -*-
 
 from flask import Flask, request, render_template
-from flask import redirect
 from flask_mail import Mail, Message
 from datetime import datetime, date
 from random import choice
