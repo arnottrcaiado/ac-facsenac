@@ -1,12 +1,12 @@
 #
 # Faculdade SENAC - ADS
-# Automação Comercial
+# IOT e Automação Comercial
 # Desenvolvimento de APIs para coleta e tratamento de dados de IOT
 #
 # Prof. Arnott Ramos Caiado
 #
 # Criação inicial: out/2021
-# Data atual: abril/2022
+# Data atual: mar/2023
 #
 # -*- coding: UTF-8 -*-
 
@@ -43,7 +43,6 @@ auth.set_access_token(
             twitter_auth_keys['access_token'],
             twitter_auth_keys['access_token_secret']
         )
-
 api = tweepy.API(auth)
 
 # chaves de segurança para API
@@ -54,7 +53,6 @@ os.environ["TZ"] = "America/Recife"
 time.tzset()
 
 arquivos = {'A11': '/home/fac/mysite/dados/leituras_a11.csv', 'A22': '/home/fac/mysite/dados/leituras_a22.csv' }
-
 
 app = Flask(__name__)
 
