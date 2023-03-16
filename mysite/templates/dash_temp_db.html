@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" http-equiv="refresh" content="60;url=https://fac.pythonanywhere.com/mostradb"/>
+
+<title> DashBoard - Sensor Temperatura </title>
+</head>
+<body style="background-color:LightYellow;">
+<h1>FTEC Sensores - DashBoard</h1>
+<p>--- Dash Board de Leituras ---</p>
+<form  method="get">
+    <input type="text" id ="data" name="data" value='{{s1}}' readonly> -> Sensor<br>
+    <input type="text" id ="data" name="data" value='{{d1}}' readonly> -> Data da Ultima Leitura<br>
+    <input type="text" id ="hora" name="hora" value='{{h1}}' readonly> -> Hora da Ultima Leitura<br>
+    <input type="text" id ="temperatura" name="temperatura" value='{{t1}}' readonly> -> Ultima Temperatura<br>
+    <br>
+    <input type="text" id ="data" name="data" value='{{s2}}' readonly> -> Sensor<br>
+    <input type="text" id ="data" name="data" value='{{d2}}' readonly> -> Data da Ultima Leitura<br>
+    <input type="text" id ="hora" name="hora" value='{{h2}}' readonly> -> Hora da Ultima Leitura<br>
+    <input type="text" id ="temperatura" name="temperatura" value='{{t2}}' readonly> -> Ultima Temperatura<br>
+
+    <div class="button">
+        <button style="margin-top: 5px;" type="submit">Ver</button>
+    </div>
+</form>
+</html>

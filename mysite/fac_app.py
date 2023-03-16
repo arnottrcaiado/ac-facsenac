@@ -1,12 +1,12 @@
 #
 # Faculdade SENAC - ADS
-# Automação Comercial
+# Iot, Automação Comercial
 # Desenvolvimento de APIs para coleta e tratamento de dados de IOT
 #
 # Prof. Arnott Ramos Caiado
 #
-# Criação inicial: out/2021
-# Data atual: abril/2022
+# Criação inicial: out/2021 - abril/2022
+# Data atual: fev/2023
 #
 # -*- coding: UTF-8 -*-
 
@@ -14,6 +14,8 @@ from flask import Flask, request, render_template
 from flask_mail import Mail, Message
 from datetime import datetime, date
 from random import choice
+
+from flask_sqlalchemy import SQLAlchemy
 
 import os
 import time
@@ -55,8 +57,28 @@ time.tzset()
 
 arquivos = {'A11': '/home/fac/mysite/dados/leituras_a11.csv', 'A22': '/home/fac/mysite/dados/leituras_a22.csv' }
 
-
 app = Flask(__name__)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://prodlattes:lattes20@prodlattes.mysql.pythonanywhere-services.com/prodlattes$docentes'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://fac:acdadosfac@fac.mysql.pythonanywhere-services.com/fac$Dados'
+db = SQLAlchemy(app)
+
+class Dados(db.Model):
+    seq = db.Column(db.Integer, primary_key=True)
+    iden = db.Column( db.String(5) )
+    data = db.Column( db.Date )
+    hora = db.Column( db.String(5) )
+    medida = db.Column( db.Float )
+
+
+    def to_json(self):
+        return {"seq": self.seq,
+        "id": self.iden,
+        "data": self.data,
+        "hora": self.hora,
+        "medida": self.medida}
+
 
 # configuracao para envio de email
 app.config['MAIL_SERVER']='smtp.gmail.com'
@@ -75,6 +97,63 @@ def inicio():
     s2, d2, h2, t2, u2 = ultimosDados(arquivos['A22'])
     return render_template( 'dash_temp.html', s1= s1, s2=s2, t1=t1, t2=t2, u1=u1, u2=u2, d1=d1, d2=d2, h1=h1, h2=h2)
 # ------------------------------------------------------------------------------------------------------------------
+
+# endpoint para visualizar ( HTML ) estado atual / ultima leitura de temperatura e umidade e banco de dados
+# http://fac.pythonanywhere.com/mostradb
+@app.route('/mostradb', methods=['GET'])
+def mostradb():
+    s1, d1, h1, t1, u1 = ultimosDadosdb(id='ID01')
+    s2, d2, h2, t2, u2 = ultimosDadosdb(id='NTCK1')
+    return render_template( 'dash_temp_db.html', s1= s1, s2=s2, t1=t1, t2=t2, u1=u1, u2=u2, d1=d1, d2=d2, h1=h1, h2=h2)
+# ------------------------------------------------------------------------------------------------------------------
+
+
+def ultimosDadosdb( id ):
+    dadosSelect = Dados.query.filter( Dados.iden.like (id) )
+    dados = []
+    for d in dadosSelect :
+        dados.append ({'N': d.seq, 'Id': d.iden, 'Dt': str(d.data), 'Hr': str(d.hora), 'M': d.medida})
+    dRet= dados[-1]
+    return dRet['Id'], dRet['Dt'], dRet['Hr'], dRet['M'], dRet['M']
+
+
+#endpoint para receber dados do Arduino ( POST ) e inserir em banco de dados
+# http://fac.pythonanywhere.com/dbinsert
+@app.route('/dbinsert', methods=['GET','POST'])
+def dbinsert():
+    if request.method == 'POST' :
+        p_id=request.form.get('id')
+        p_temp=request.form.get('medida')
+        p_stat=request.form.get('status')
+        # p_umid=request.form.get('umidade')
+
+        iden = p_id
+        medida = p_temp
+        data = str(date.today())
+        hora_atual = str(datetime.time(datetime.now()))
+        hora_atual = hora_atual[0:5]
+        hora = hora_atual
+
+        if int(p_stat)+1 != 0 :
+            dadosRecebidos = Dados( iden = iden, medida = medida, data = data, hora = hora )
+            db.session.add( dadosRecebidos )
+            db.session.commit()
+            return json.dumps( {'Id': iden, 'Medida': medida } )
+        else :
+            return json.dumps( {'Id': iden, 'Medida': medida , "Stat:" : "NoWrite"} )
+
+    elif request.method == 'GET' :
+        totalDados = Dados.query.all()
+        dados = []
+        for d in totalDados :
+            dados.append ({'N': d.seq, 'Id': d.iden, 'Dt': str(d.data), 'Hr': str(d.hora), 'M': d.medida})
+        if request.args.get('query') == 'all':
+            return json.dumps( dados )
+        elif request.args.get('query') == 'last' :
+            return json.dumps ( dados[-1] )
+        else :
+            return json.dumps ({ "Leituras": len(dados)} )
+
 
 # enbdpoint para receber dados do ARDUINO ( POST ) e gravar em arquivo
 # https://fac.pythonanywhere.com/datalog
@@ -138,12 +217,18 @@ def twitt():
 # ----------------------------------------------------------------------
 
 # endpoint para enviar um email
-# https://fac.pythonanywhere.com.br/email?destino=email@gmail.com?assunto=seu assunto?mensagem=sua mensagem
+# https://fac.pythonanywhere.com.br/email?destino=email@gmail.com&assunto=seu assunto&mensagem=sua mensagem
 @app.route("/email")
 def enviaMensagem():
     destino = request.args.get('destino')
+    if destino == None :
+        destino = request.form.get('destino')
     mensagem = request.args.get('mensagem')
+    if mensagem == None :
+        mensagem = request.form.get('mensagem')
     assunto = request.args.get('assunto')
+    if assunto == None :
+        assunto = request.form.get('assunto')
 
     if destino == None :
         return json.dumps({'Envia':'Erro - Sem destino'})
