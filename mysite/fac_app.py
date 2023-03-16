@@ -1,21 +1,15 @@
 #
 # Faculdade SENAC - ADS
-<<<<<<< HEAD
 # Iot, Automação Comercial
-=======
 # IOT e Automação Comercial
->>>>>>> 3f04fa74c2d3870a5c239b8d402b3549e988dba4
 # Desenvolvimento de APIs para coleta e tratamento de dados de IOT
 #
 # Prof. Arnott Ramos Caiado
 #
-<<<<<<< HEAD
 # Criação inicial: out/2021 - abril/2022
 # Data atual: fev/2023
-=======
 # Criação inicial: out/2021
 # Data atual: mar/2023
->>>>>>> 3f04fa74c2d3870a5c239b8d402b3549e988dba4
 #
 # -*- coding: UTF-8 -*-
 
