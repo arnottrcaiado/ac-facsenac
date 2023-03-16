@@ -1,6 +1,5 @@
 #
 # Faculdade SENAC - ADS
-# Iot, Automação Comercial
 # IOT e Automação Comercial
 # Desenvolvimento de APIs para coleta e tratamento de dados de IOT
 #
